@@ -68,6 +68,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email,
       username: username.toLowerCase(),
       password,
+      role: "customer", // Automatically set as customer
       ...(avatarUrl && { avatar: avatarUrl }),
     });
 
@@ -120,6 +121,11 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!user) {
     throw new ApiError(400, "Invalid email or username");
+  }
+
+  // Check if user is active
+  if (!user.isActive) {
+    throw new ApiError(403, "Account is deactivated. Please contact support.");
   }
 
   // validate password

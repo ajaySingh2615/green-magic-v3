@@ -45,6 +45,77 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    // New e-commerce fields
+    role: {
+      type: String,
+      enum: ["customer", "vendor", "admin"],
+      default: "customer",
+      index: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
+    vendorProfile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vendor",
+      sparse: true, // Allows null values for non-vendor users
+    },
+    addresses: [
+      {
+        type: {
+          type: String,
+          enum: ["home", "office", "other"],
+          default: "home",
+        },
+        fullName: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        phone: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        street: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        city: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        state: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        zipCode: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        country: {
+          type: String,
+          default: "India",
+          trim: true,
+        },
+        isDefault: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -70,6 +141,7 @@ userSchema.methods.generateAccessToken = function () {
       username: this.username,
       email: this.email,
       fullname: this.fullname,
+      role: this.role, // Include role in JWT token
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
@@ -86,5 +158,10 @@ userSchema.methods.generateRefreshToken = function () {
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
   );
 };
+
+// Add indexes for better query performance
+userSchema.index({ role: 1, isActive: 1 });
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
 
 export const User = mongoose.model("User", userSchema);

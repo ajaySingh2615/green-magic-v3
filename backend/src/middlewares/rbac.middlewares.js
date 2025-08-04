@@ -1,8 +1,8 @@
 import { ApiError } from "../utils/ApiError.js";
 
 /**
- * Role-Based Access Control Middleware
- * Provides authorization functions for different user roles
+ * Enhanced Role-Based Access Control Middleware
+ * Provides comprehensive authorization functions for different user roles
  */
 
 /**
@@ -113,4 +113,210 @@ export const requireActiveUser = (req, res, next) => {
   }
 
   next();
+};
+
+/**
+ * Enhanced Features: Conditional Authorization
+ * Allows different roles based on conditions
+ */
+
+/**
+ * Allow vendors to access their own resources or admins to access any
+ * @param {string} resourceField - Field containing resource owner ID
+ * @returns {Function} Express middleware function
+ */
+export const authorizeOwnerOrAdmin = (resourceField = "userId") => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "Authentication required"));
+    }
+
+    // Admin can access everything
+    if (req.user.role === "admin") {
+      return next();
+    }
+
+    // Check if user owns the resource
+    const resourceOwnerId =
+      req.params[resourceField] || req.body[resourceField];
+    if (resourceOwnerId && resourceOwnerId === req.user._id.toString()) {
+      return next();
+    }
+
+    return res
+      .status(403)
+      .json(new ApiError(403, "Access denied to this resource"));
+  };
+};
+
+/**
+ * Check multiple permissions with OR logic
+ * @param {Function[]} permissions - Array of permission functions
+ * @returns {Function} Express middleware function
+ */
+export const anyPermission = (permissions = []) => {
+  return async (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "Authentication required"));
+    }
+
+    let hasPermission = false;
+
+    for (const permission of permissions) {
+      const mockRes = {
+        status: () => mockRes,
+        json: () => mockRes,
+        statusCode: 200,
+      };
+
+      const mockNext = () => {
+        hasPermission = true;
+      };
+
+      try {
+        await permission(req, mockRes, mockNext);
+        if (hasPermission) break;
+      } catch (error) {
+        // Continue to next permission
+      }
+    }
+
+    if (!hasPermission) {
+      return res
+        .status(403)
+        .json(new ApiError(403, "Insufficient permissions"));
+    }
+
+    next();
+  };
+};
+
+/**
+ * Audit logging for access attempts
+ * @param {string} resource - Resource being accessed
+ * @returns {Function} Express middleware function
+ */
+export const auditAccess = (resource) => {
+  return (req, res, next) => {
+    const logData = {
+      timestamp: new Date().toISOString(),
+      user: req.user
+        ? {
+            id: req.user._id,
+            email: req.user.email,
+            role: req.user.role,
+          }
+        : null,
+      resource,
+      method: req.method,
+      path: req.path,
+      ip: req.ip || req.connection.remoteAddress,
+      userAgent: req.get("User-Agent"),
+    };
+
+    // Log to console (in production, use proper logging service)
+    console.log(`[RBAC AUDIT] ${JSON.stringify(logData)}`);
+
+    next();
+  };
+};
+
+/**
+ * Rate limiting by role
+ * @param {Object} limits - Rate limits per role
+ * @returns {Function} Express middleware function
+ */
+export const rateLimitByRole = (limits = {}) => {
+  const attempts = new Map();
+
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "Authentication required"));
+    }
+
+    const userRole = req.user.role;
+    const limit = limits[userRole] || limits.default || 100;
+    const windowMs = 60 * 1000; // 1 minute window
+
+    const userId = req.user._id.toString();
+    const now = Date.now();
+
+    if (!attempts.has(userId)) {
+      attempts.set(userId, { count: 1, resetTime: now + windowMs });
+      return next();
+    }
+
+    const userAttempts = attempts.get(userId);
+
+    if (now > userAttempts.resetTime) {
+      // Reset the window
+      userAttempts.count = 1;
+      userAttempts.resetTime = now + windowMs;
+      return next();
+    }
+
+    if (userAttempts.count >= limit) {
+      return res
+        .status(429)
+        .json(
+          new ApiError(429, "Rate limit exceeded. Please try again later.")
+        );
+    }
+
+    userAttempts.count++;
+    next();
+  };
+};
+
+/**
+ * RBAC Utils for external use
+ */
+export const rbacUtils = {
+  /**
+   * Check if user has role programmatically
+   * @param {Object} user - User object
+   * @param {string|string[]} roles - Role(s) to check
+   * @returns {boolean}
+   */
+  userHasRole: (user, roles) => {
+    if (!user || !user.role) return false;
+    const roleArray = Array.isArray(roles) ? roles : [roles];
+    return roleArray.includes(user.role);
+  },
+
+  /**
+   * Check if user is active
+   * @param {Object} user - User object
+   * @returns {boolean}
+   */
+  userIsActive: (user) => {
+    return user && user.isActive === true;
+  },
+
+  /**
+   * Get role hierarchy level
+   * @param {string} role - User role
+   * @returns {number} - Higher number = more permissions
+   */
+  getRoleLevel: (role) => {
+    const hierarchy = {
+      customer: 1,
+      vendor: 2,
+      admin: 3,
+    };
+    return hierarchy[role] || 0;
+  },
+
+  /**
+   * Check if user can access role level
+   * @param {Object} user - User object
+   * @param {string} requiredRole - Required role
+   * @returns {boolean}
+   */
+  canAccessRole: (user, requiredRole) => {
+    if (!user) return false;
+    return (
+      rbacUtils.getRoleLevel(user.role) >= rbacUtils.getRoleLevel(requiredRole)
+    );
+  },
 };

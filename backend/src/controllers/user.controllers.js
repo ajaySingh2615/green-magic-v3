@@ -28,13 +28,21 @@ const generateAccessAndRefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullname, email, username, password } = req.body;
+  const { fullname, email, username, password, role } = req.body;
 
   // validation
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All fields are required");
+  }
+
+  // Validate role if provided
+  const validRoles = ["customer", "vendor"];
+  const userRole = role || "customer"; // Default to customer
+
+  if (!validRoles.includes(userRole)) {
+    throw new ApiError(400, "Invalid role. Must be 'customer' or 'vendor'");
   }
 
   // check if user already exists
@@ -68,7 +76,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email,
       username: username.toLowerCase(),
       password,
-      role: "customer", // Automatically set as customer
+      role: userRole, // Use selected role or default to customer
       ...(avatarUrl && { avatar: avatarUrl }),
     });
 

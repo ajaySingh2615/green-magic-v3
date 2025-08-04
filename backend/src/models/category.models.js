@@ -21,18 +21,15 @@ const categorySchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       default: null,
-      index: true,
     },
     level: {
       type: Number,
       default: 0, // 0 = root category, 1 = sub-category, 2 = sub-sub-category
       min: 0,
       max: 3, // Maximum 4 levels deep
-      index: true,
     },
     path: {
-      type: String,
-      index: true, // For efficient hierarchy queries
+      type: String, // For efficient hierarchy queries
     },
 
     // SEO and URL
@@ -41,7 +38,6 @@ const categorySchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     metaTitle: {
       type: String,
@@ -82,12 +78,10 @@ const categorySchema = new Schema(
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
     },
     isFeatured: {
       type: Boolean,
       default: false,
-      index: true,
     },
     isVisible: {
       type: Boolean,
@@ -98,7 +92,6 @@ const categorySchema = new Schema(
     displayOrder: {
       type: Number,
       default: 0,
-      index: true,
     },
     showInNavigation: {
       type: Boolean,
@@ -173,7 +166,6 @@ const categorySchema = new Schema(
 );
 
 // Indexes for performance optimization
-categorySchema.index({ slug: 1 });
 categorySchema.index({ parentCategory: 1, isActive: 1 });
 categorySchema.index({ level: 1, displayOrder: 1 });
 categorySchema.index({ isActive: 1, isFeatured: 1 });

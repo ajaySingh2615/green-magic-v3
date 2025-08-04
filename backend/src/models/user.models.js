@@ -12,7 +12,6 @@ const userSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     email: {
       type: String,
@@ -50,12 +49,10 @@ const userSchema = new Schema(
       type: String,
       enum: ["customer", "vendor", "admin"],
       default: "customer",
-      index: true,
     },
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
     },
     vendorProfile: {
       type: mongoose.Schema.Types.ObjectId,
@@ -161,7 +158,5 @@ userSchema.methods.generateRefreshToken = function () {
 
 // Add indexes for better query performance
 userSchema.index({ role: 1, isActive: 1 });
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
 
 export const User = mongoose.model("User", userSchema);

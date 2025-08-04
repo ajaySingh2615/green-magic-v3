@@ -294,10 +294,7 @@ const vendorSchema = new Schema(
 );
 
 // Indexes for performance optimization
-vendorSchema.index({ userId: 1 });
 vendorSchema.index({ verificationStatus: 1, isActive: 1 });
-vendorSchema.index({ gstNumber: 1 });
-vendorSchema.index({ "storeSettings.storeSlug": 1 });
 vendorSchema.index({ "contactInfo.email": 1 });
 vendorSchema.index({ createdAt: -1 });
 

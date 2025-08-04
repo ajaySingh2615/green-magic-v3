@@ -7,7 +7,6 @@ const productSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
     description: {
       type: String,
@@ -26,13 +25,11 @@ const productSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
       required: true,
-      index: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,
-      index: true,
     },
     subcategories: [
       {
@@ -47,7 +44,6 @@ const productSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     metaTitle: {
       type: String,
@@ -110,7 +106,6 @@ const productSchema = new Schema(
         unique: true,
         trim: true,
         uppercase: true,
-        index: true,
       },
       stock: {
         type: Number,
@@ -280,7 +275,6 @@ const productSchema = new Schema(
       type: String,
       enum: ["draft", "active", "inactive", "archived", "out_of_stock"],
       default: "draft",
-      index: true,
     },
     isVisible: {
       type: Boolean,
@@ -289,7 +283,6 @@ const productSchema = new Schema(
     isFeatured: {
       type: Boolean,
       default: false,
-      index: true,
     },
     isDigital: {
       type: Boolean,
@@ -307,7 +300,6 @@ const productSchema = new Schema(
     brand: {
       type: String,
       trim: true,
-      index: true,
     },
     model: {
       type: String,
@@ -393,8 +385,6 @@ const productSchema = new Schema(
 // Indexes for performance optimization
 productSchema.index({ vendor: 1, status: 1 });
 productSchema.index({ category: 1, status: 1 });
-productSchema.index({ slug: 1 });
-productSchema.index({ "inventory.sku": 1 });
 productSchema.index({ status: 1, isVisible: 1 });
 productSchema.index({ isFeatured: 1, status: 1 });
 productSchema.index({ "pricing.salePrice": 1 });

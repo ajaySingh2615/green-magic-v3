@@ -22,12 +22,18 @@ app.use(cookieParser());
 import healthcheckRoutes from "./routes/healthcheck.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import googleAuthRoutes from "./routes/googleAuth.routes.js";
+import vendorRoutes from "./routes/vendor.routes.js";
+import categoryRoutes from "./routes/category.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
 
 // routes
 app.use("/api/v1/healthcheck", healthcheckRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/users", googleAuthRoutes);
+app.use("/api/v1/vendors", vendorRoutes);
+app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/products", productRoutes);
 
 app.use(errorHandler);
 export { app };

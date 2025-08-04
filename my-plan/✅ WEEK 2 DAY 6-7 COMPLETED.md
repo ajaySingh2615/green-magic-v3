@@ -12,25 +12,40 @@
 
 ### 1. **Enhanced AuthService** (`frontent/src/services/authService.js`)
 
+#### **Registration System:**
+
+```javascript
+// Customer Registration (Simplified)
+async register(userData) {
+  // Customer registration only
+  role: "customer", // Always customer for main registration
+}
+
+// Vendor Registration (Comprehensive)
+async registerVendor(vendorData) {
+  const formData = new FormData();
+
+  // Personal info, business details, address, documents
+  // Uses multipart/form-data for file uploads
+  // Calls /vendors/register endpoint
+}
+```
+
 #### **Role-Related API Integration:**
 
 ```javascript
-// New Role Management Endpoints:
+// Role Management Endpoints:
 AVAILABLE_ROLES: "/roles/available",
 CURRENT_ROLE: "/roles/current",
 ROLE_DASHBOARD: "/roles/dashboard",
 CHECK_PERMISSIONS: "/roles/permissions",
 ROLE_UPGRADE: "/roles/upgrade"
-
-// Enhanced Registration with Role Support:
-async register(userData) {
-  // Include role in registration data
-  role: userData.role, // Add role to registration
-}
 ```
 
-#### **Complete Role Management Methods:**
+#### **Complete Registration Methods:**
 
+- ✅ **register()**: Customer registration (simplified)
+- ✅ **registerVendor()**: Vendor registration (comprehensive with file upload)
 - ✅ **getAvailableRoles()**: Fetch available roles for registration
 - ✅ **getCurrentUserRole()**: Get current user's role information
 - ✅ **getRoleDashboard()**: Fetch role-based dashboard configuration
@@ -120,43 +135,78 @@ const login = async (credentials) => {
 - ✅ **requestRoleUpgrade()**: Handle role upgrade requests
 - ✅ **clearAuthState()**: Complete state cleanup on logout
 
-### 4. **Enhanced Registration** (`frontent/src/pages/auth/RegisterPage.jsx`)
+### 4. **Enhanced Registration System**
 
-#### **Role Selection Interface:**
+#### **Customer Registration** (`frontent/src/pages/auth/RegisterPage.jsx`)
 
 ```jsx
 {
-  /* Role Selection */
+  /* Customer Registration Notice */
 }
-<div className="grid grid-cols-1 gap-3">
-  {availableRoles.map((role) => (
-    <div key={role.value} className="relative">
-      <input
-        {...register("role", {
-          required: "Please select an account type",
-        })}
-        type="radio"
-        value={role.value}
-        defaultChecked={role.value === "customer"}
-      />
-      <label className="flex items-start p-4 bg-white border border-natural-300 rounded-lg cursor-pointer hover:bg-natural-50 peer-checked:border-primary-500 peer-checked:bg-primary-50">
-        {/* Role details with icon, description, permissions */}
-      </label>
-    </div>
-  ))}
+<div className="flex items-center p-4 bg-green-50 border border-green-200 rounded-lg">
+  <Users className="h-6 w-6 text-green-600 mr-3 flex-shrink-0" />
+  <div>
+    <h3 className="text-sm font-medium text-green-800">
+      Customer Registration
+    </h3>
+    <p className="text-sm text-green-600">
+      Create your account to browse and purchase products from our trusted
+      vendors
+    </p>
+    <p className="mt-1 text-xs text-green-500">
+      Looking to sell products? Use the "Become a Vendor" link in the navigation
+      above
+    </p>
+  </div>
 </div>;
 ```
 
-#### **Enhanced Registration Features:**
+#### **Vendor Registration** (`frontent/src/pages/auth/VendorRegisterPage.jsx`)
 
-- ✅ **Dynamic Role Loading**: Fetches available roles from backend
-- ✅ **Role Descriptions**: Shows detailed role information
-- ✅ **Permission Preview**: Displays key permissions for each role
-- ✅ **Visual Role Selection**: Radio buttons with enhanced UI
-- ✅ **Default Selection**: Customer role selected by default
-- ✅ **Validation**: Required role selection with error handling
+**Complete Business Registration Form:**
 
-### 5. **Role-Based Navigation** (`frontent/src/components/layout/Navbar.jsx`)
+- ✅ **Personal Information**: Full name, username, email, password
+- ✅ **Business Details**: Company name, GST number, business description
+- ✅ **Contact Information**: Business phone, alternate phone, contact email
+- ✅ **Business Address**: Complete address with validation
+- ✅ **Document Upload**: Business license, GST certificate, address proof, PAN card, bank statement
+- ✅ **File Upload System**: Drag-and-drop interface with file validation
+- ✅ **Form Validation**: Comprehensive validation for all fields
+- ✅ **GST Validation**: Pattern matching for Indian GST numbers
+- ✅ **Phone Validation**: Indian mobile number format validation
+
+#### **Registration Features:**
+
+- ✅ **Separate Registration Flows**: Customer and vendor have dedicated forms
+- ✅ **Role-Based Registration**: Customer registration simplified, vendor registration comprehensive
+- ✅ **Business Verification**: Vendor registration includes document upload for verification
+- ✅ **Navigation Integration**: "Become a Vendor" link prominently displayed
+- ✅ **Form Validation**: Client-side validation with error handling
+- ✅ **File Upload**: Multi-document upload with progress indicators
+
+### 5. **Enhanced Navigation System** (`frontent/src/components/layout/Navbar.jsx`)
+
+#### **Vendor Registration Integration:**
+
+```jsx
+// Desktop Navigation
+<Link
+  to="/vendor/register"
+  className="flex items-center space-x-1 px-3 py-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg font-medium transition-all duration-200"
+>
+  <Store className="w-4 h-4" />
+  <span>Become a Vendor</span>
+</Link>
+
+// Mobile Navigation
+<Link
+  to="/vendor/register"
+  className="flex items-center justify-center space-x-2 w-full px-4 py-3 text-green-600 hover:bg-green-50 rounded-lg font-medium transition-colors duration-200"
+>
+  <Store className="w-4 h-4" />
+  <span>Become a Vendor</span>
+</Link>
+```
 
 #### **Dynamic Navigation System:**
 
@@ -185,13 +235,15 @@ const getAuthenticatedLinks = () => {
 };
 ```
 
-#### **Enhanced User Display:**
+#### **Enhanced Navigation Features:**
 
+- ✅ **Vendor Registration Promotion**: Prominent "Become a Vendor" link
 - ✅ **Role-Based Icons**: Different icons for admin, vendor, customer
 - ✅ **Role Badges**: Color-coded role indicators
 - ✅ **Dynamic Navigation**: Shows appropriate links based on role
 - ✅ **Mobile Responsive**: Works on all screen sizes
 - ✅ **Visual Role Indication**: Clear role identification
+- ✅ **Business-Focused Design**: Green theme for vendor-related actions
 
 ### 6. **Role-Based Components** (`frontent/src/components/common/`)
 
@@ -544,25 +596,30 @@ Admin → /admin/dashboard
 ### **Week 2, Day 6-7 Goals Achieved:**
 
 - [x] **Frontend Auth Context Update**: Enhanced with comprehensive role management
-- [x] **Role-Based Navigation**: Dynamic navigation based on user roles
-- [x] **Registration Enhancement**: Role selection during signup
+- [x] **Role-Based Navigation**: Dynamic navigation with vendor registration promotion
+- [x] **Registration System Overhaul**: Separate customer and vendor registration flows
+- [x] **Vendor Registration**: Complete business registration with document upload
+- [x] **Navigation Enhancement**: "Become a Vendor" prominently featured
 - [x] **Login Flow Enhancement**: Role-based redirect after authentication
 - [x] **Component System**: RoleGuard and RoleBadge components
-- [x] **UI/UX Enhancement**: Visual role indicators and improved experience
-- [x] **API Integration**: Complete integration with backend role system
+- [x] **UI/UX Enhancement**: Business-focused design for vendor features
+- [x] **API Integration**: Complete integration with vendor registration endpoint
 - [x] **State Management**: Comprehensive role state management
 - [x] **Permission System**: Frontend permission checking
-- [x] **Testing & Validation**: Complete auth flow testing
+- [x] **File Upload System**: Document upload for vendor verification
 
 ### **Beyond Requirements:**
 
+- [x] **Dual Registration System**: Separate, optimized flows for customers and vendors
+- [x] **Business Document Management**: Complete file upload system for vendor verification
 - [x] **Advanced Role Components**: Reusable role-based UI components
 - [x] **Permission Framework**: Comprehensive permission checking system
-- [x] **Visual Role System**: Color-coded badges and icons
-- [x] **Smart Navigation**: Dynamic menu generation
-- [x] **Enhanced UX**: Personalized user experience based on roles
+- [x] **Visual Role System**: Color-coded badges and icons with business themes
+- [x] **Smart Navigation**: Dynamic menu generation with vendor promotion
+- [x] **Enhanced UX**: Role-specific user experiences
 - [x] **Mobile Optimization**: Responsive role-based interface
 - [x] **Developer Tools**: Comprehensive utilities and helpers
+- [x] **Business Integration**: GST validation, address management, document verification
 
 ---
 
@@ -573,8 +630,10 @@ Admin → /admin/dashboard
 The enhanced frontend authentication system now provides:
 
 - **Complete Role-Based UI System**
-- **Dynamic Navigation & Components**
-- **Enhanced Registration with Role Selection**
+- **Dynamic Navigation with Vendor Promotion**
+- **Dual Registration System (Customer/Vendor)**
+- **Comprehensive Vendor Onboarding**
+- **Business Document Upload & Verification**
 - **Smart Login Flow with Role-Based Redirects**
 - **Comprehensive Permission Checking**
 - **Visual Role Indicators & Badges**
@@ -601,9 +660,12 @@ The enhanced frontend authentication system now provides:
 
 ### **Registration Flow:**
 
-- ✅ Role selection works perfectly
-- ✅ Backend receives role parameter
-- ✅ User created with selected role
+- ✅ Customer registration simplified and streamlined
+- ✅ Vendor registration comprehensive with business details
+- ✅ Document upload system functional
+- ✅ Backend receives appropriate registration data
+- ✅ Users created with correct roles
+- ✅ Navigation promotes vendor registration effectively
 
 ### **Login Flow:**
 

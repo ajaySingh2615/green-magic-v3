@@ -113,6 +113,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const registerVendor = async (vendorData) => {
+    try {
+      setIsLoading(true);
+      const response = await authService.registerVendor(vendorData);
+
+      if (response.success) {
+        toast.success(
+          "Vendor registration successful! Please login to continue."
+        );
+        return { success: true, data: response.data };
+      } else {
+        throw new Error(response.message || "Vendor registration failed");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Vendor registration failed";
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -232,21 +257,32 @@ export const AuthProvider = ({ children }) => {
       if (response.success && Array.isArray(response.data)) {
         setAvailableRoles(response.data);
       } else {
-        console.error("Available roles response is not an array:", response.data);
+        console.error(
+          "Available roles response is not an array:",
+          response.data
+        );
         // Set default roles if API fails
         setAvailableRoles([
           {
             value: "customer",
-            label: "Customer", 
+            label: "Customer",
             description: "Browse and purchase products from vendors",
-            permissions: ["Browse products", "Add items to cart", "Place orders"]
+            permissions: [
+              "Browse products",
+              "Add items to cart",
+              "Place orders",
+            ],
           },
           {
             value: "vendor",
             label: "Vendor/Seller",
-            description: "Sell products and manage your online store", 
-            permissions: ["Create and manage products", "Manage inventory", "Process orders"]
-          }
+            description: "Sell products and manage your online store",
+            permissions: [
+              "Create and manage products",
+              "Manage inventory",
+              "Process orders",
+            ],
+          },
         ]);
       }
     } catch (error) {
@@ -255,16 +291,20 @@ export const AuthProvider = ({ children }) => {
       setAvailableRoles([
         {
           value: "customer",
-          label: "Customer", 
+          label: "Customer",
           description: "Browse and purchase products from vendors",
-          permissions: ["Browse products", "Add items to cart", "Place orders"]
+          permissions: ["Browse products", "Add items to cart", "Place orders"],
         },
         {
           value: "vendor",
           label: "Vendor/Seller",
-          description: "Sell products and manage your online store", 
-          permissions: ["Create and manage products", "Manage inventory", "Process orders"]
-        }
+          description: "Sell products and manage your online store",
+          permissions: [
+            "Create and manage products",
+            "Manage inventory",
+            "Process orders",
+          ],
+        },
       ]);
     }
   };
@@ -317,6 +357,7 @@ export const AuthProvider = ({ children }) => {
     // Auth methods
     login,
     register,
+    registerVendor,
     logout,
     googleLogin,
     forceLogout,

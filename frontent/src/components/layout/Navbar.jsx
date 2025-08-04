@@ -159,6 +159,13 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link
+                  to="/vendor/register"
+                  className="flex items-center space-x-1 px-3 py-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg font-medium transition-all duration-200"
+                >
+                  <Store className="w-4 h-4" />
+                  <span>Become a Vendor</span>
+                </Link>
+                <Link
                   to="/login"
                   className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
                 >
@@ -262,6 +269,14 @@ const Navbar = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
+                    <Link
+                      to="/vendor/register"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center justify-center space-x-2 w-full px-4 py-3 text-green-600 hover:bg-green-50 rounded-lg font-medium transition-colors duration-200"
+                    >
+                      <Store className="w-4 h-4" />
+                      <span>Become a Vendor</span>
+                    </Link>
                     <Link
                       to="/login"
                       onClick={() => setIsMenuOpen(false)}

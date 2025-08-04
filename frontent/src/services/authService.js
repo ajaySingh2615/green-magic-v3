@@ -18,13 +18,13 @@ const AUTH_ENDPOINTS = {
 class AuthService {
   async register(userData) {
     try {
-      // Include role in registration data
+      // Customer registration only
       const response = await apiClient.post(AUTH_ENDPOINTS.REGISTER, {
         fullname: userData.fullname,
         email: userData.email,
         username: userData.username,
         password: userData.password,
-        role: userData.role, // Add role to registration
+        role: "customer", // Always customer for main registration
       });
 
       return {
@@ -34,6 +34,80 @@ class AuthService {
       };
     } catch (error) {
       console.error("Registration error:", error);
+      throw error;
+    }
+  }
+
+  async registerVendor(vendorData) {
+    try {
+      const formData = new FormData();
+
+      // Add basic user data
+      formData.append("fullname", vendorData.fullname);
+      formData.append("username", vendorData.username);
+      formData.append("email", vendorData.email);
+      formData.append("password", vendorData.password);
+
+      // Add business data
+      formData.append("companyName", vendorData.companyName);
+      formData.append("gstNumber", vendorData.gstNumber);
+      formData.append("businessDescription", vendorData.businessDescription);
+
+      // Add business address
+      formData.append(
+        "businessAddress[street]",
+        vendorData.businessAddress.street
+      );
+      formData.append("businessAddress[city]", vendorData.businessAddress.city);
+      formData.append(
+        "businessAddress[state]",
+        vendorData.businessAddress.state
+      );
+      formData.append(
+        "businessAddress[zipCode]",
+        vendorData.businessAddress.zipCode
+      );
+      formData.append(
+        "businessAddress[country]",
+        vendorData.businessAddress.country || "India"
+      );
+
+      // Add contact info
+      formData.append("contactInfo[phone]", vendorData.contactInfo.phone);
+      formData.append(
+        "contactInfo[alternatePhone]",
+        vendorData.contactInfo.alternatePhone || ""
+      );
+      formData.append(
+        "contactInfo[email]",
+        vendorData.contactInfo.email || vendorData.email
+      );
+
+      // Add document files
+      if (vendorData.documents) {
+        Object.keys(vendorData.documents).forEach((key) => {
+          if (
+            vendorData.documents[key] &&
+            vendorData.documents[key] instanceof File
+          ) {
+            formData.append(key, vendorData.documents[key]);
+          }
+        });
+      }
+
+      const response = await apiClient.post("/vendors/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Vendor registration error:", error);
       throw error;
     }
   }

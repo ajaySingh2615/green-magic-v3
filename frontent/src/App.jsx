@@ -7,6 +7,7 @@ import Footer from "./components/layout/Footer";
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import VendorRegisterPage from "./pages/auth/VendorRegisterPage";
 
 // Main Pages
 import HomePage from "./pages/HomePage";
@@ -68,6 +69,14 @@ function App() {
             element={
               <PublicRoute>
                 <RegisterPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/vendor/register"
+            element={
+              <PublicRoute>
+                <VendorRegisterPage />
               </PublicRoute>
             }
           />

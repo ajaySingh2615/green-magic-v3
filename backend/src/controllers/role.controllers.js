@@ -51,7 +51,7 @@ const getAvailableRoles = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, "Available user roles retrieved successfully", roles)
+      new ApiResponse(200, roles, "Available user roles retrieved successfully")
     );
 });
 

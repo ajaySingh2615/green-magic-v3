@@ -1,15 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Mail, Lock, User, Leaf } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Leaf,
+  Users,
+  Store,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import GoogleSignIn from "../../pages/auth/GoogleSignIn";
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { register: registerUser, isLoading } = useAuth();
+  const {
+    register: registerUser,
+    isLoading,
+    availableRoles,
+    loadAvailableRoles,
+  } = useAuth();
   const navigate = useNavigate();
+
+  // Load available roles on component mount
+  useEffect(() => {
+    loadAvailableRoles();
+  }, [loadAvailableRoles]);
 
   const {
     register,
@@ -26,6 +45,7 @@ const RegisterPage = () => {
       email: data.email,
       username: data.username,
       password: data.password,
+      role: data.role || "customer", // Include selected role
     };
 
     const result = await registerUser(formData);
@@ -239,6 +259,77 @@ const RegisterPage = () => {
                   {errors.confirmPassword.message}
                 </p>
               )}
+            </div>
+
+            {/* Role Selection */}
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-natural-700 mb-2"
+              >
+                Account Type
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                {availableRoles.map((role) => (
+                  <div key={role.value} className="relative">
+                    <input
+                      {...register("role", {
+                        required: "Please select an account type",
+                      })}
+                      type="radio"
+                      value={role.value}
+                      id={role.value}
+                      className="sr-only peer"
+                      defaultChecked={role.value === "customer"}
+                    />
+                    <label
+                      htmlFor={role.value}
+                      className="flex items-start p-4 bg-white border border-natural-300 rounded-lg cursor-pointer hover:bg-natural-50 peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all duration-200"
+                    >
+                      <div className="flex-shrink-0 mr-3 mt-1">
+                        {role.value === "customer" ? (
+                          <Users className="h-5 w-5 text-natural-500" />
+                        ) : (
+                          <Store className="h-5 w-5 text-natural-500" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-medium text-natural-900">
+                            {role.label}
+                          </h3>
+                          <div className="h-4 w-4 border border-natural-300 rounded-full peer-checked:border-primary-500 peer-checked:bg-primary-500 peer-checked:border-4 transition-all duration-200"></div>
+                        </div>
+                        <p className="mt-1 text-sm text-natural-600">
+                          {role.description}
+                        </p>
+                        {role.permissions && (
+                          <ul className="mt-2 text-xs text-natural-500">
+                            {role.permissions
+                              .slice(0, 3)
+                              .map((permission, index) => (
+                                <li key={index} className="inline">
+                                  {permission}
+                                  {index <
+                                    Math.min(role.permissions.length, 3) - 1 &&
+                                    " • "}
+                                </li>
+                              ))}
+                          </ul>
+                        )}
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {errors.role && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.role.message}
+                </p>
+              )}
+              <p className="mt-2 text-xs text-natural-500">
+                You can upgrade your account later if needed.
+              </p>
             </div>
           </div>
 

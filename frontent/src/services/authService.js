@@ -7,17 +7,24 @@ const AUTH_ENDPOINTS = {
   REFRESH_TOKEN: "/users/refresh-token",
   CURRENT_USER: "/users/current",
   GOOGLE_SIGNIN: "/users/google-signin",
+  // Role Management Endpoints
+  AVAILABLE_ROLES: "/roles/available",
+  CURRENT_ROLE: "/roles/current",
+  ROLE_DASHBOARD: "/roles/dashboard",
+  CHECK_PERMISSIONS: "/roles/permissions",
+  ROLE_UPGRADE: "/roles/upgrade",
 };
 
 class AuthService {
   async register(userData) {
     try {
-      // Since we're removing avatar, just send JSON data
+      // Include role in registration data
       const response = await apiClient.post(AUTH_ENDPOINTS.REGISTER, {
         fullname: userData.fullname,
         email: userData.email,
         username: userData.username,
         password: userData.password,
+        role: userData.role, // Add role to registration
       });
 
       return {
@@ -119,6 +126,82 @@ class AuthService {
         success: false,
         message: "Force logout completed locally",
       };
+    }
+  }
+
+  // Role Management Methods
+  async getAvailableRoles() {
+    try {
+      const response = await apiClient.get(AUTH_ENDPOINTS.AVAILABLE_ROLES);
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Get available roles error:", error);
+      throw error;
+    }
+  }
+
+  async getCurrentUserRole() {
+    try {
+      const response = await apiClient.get(AUTH_ENDPOINTS.CURRENT_ROLE);
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Get current user role error:", error);
+      throw error;
+    }
+  }
+
+  async getRoleDashboard() {
+    try {
+      const response = await apiClient.get(AUTH_ENDPOINTS.ROLE_DASHBOARD);
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Get role dashboard error:", error);
+      throw error;
+    }
+  }
+
+  async checkPermissions(action, resource = null) {
+    try {
+      const params = { action };
+      if (resource) params.resource = resource;
+
+      const response = await apiClient.get(AUTH_ENDPOINTS.CHECK_PERMISSIONS, {
+        params,
+      });
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Check permissions error:", error);
+      throw error;
+    }
+  }
+
+  async requestRoleUpgrade() {
+    try {
+      const response = await apiClient.post(AUTH_ENDPOINTS.ROLE_UPGRADE);
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      console.error("Role upgrade request error:", error);
+      throw error;
     }
   }
 

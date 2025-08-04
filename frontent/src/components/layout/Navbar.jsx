@@ -1,11 +1,33 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Leaf, User, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  Leaf,
+  User,
+  LogOut,
+  Store,
+  Shield,
+  Users,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import {
+  getUserDisplayName,
+  getRoleBadgeColor,
+  isAdmin,
+  isVendor,
+} from "../../utils/roleUtils";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, user, logout } = useAuth();
+  const {
+    isAuthenticated,
+    user,
+    userRole,
+    logout,
+    canAccessVendorPanel,
+    canAccessAdminPanel,
+  } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,7 +48,30 @@ const Navbar = () => {
     { path: "/contact", label: "Contact" },
   ];
 
-  const authenticatedLinks = [{ path: "/products", label: "Products" }];
+  const getAuthenticatedLinks = () => {
+    const links = [{ path: "/products", label: "Products" }];
+
+    // Add role-specific navigation
+    if (canAccessVendorPanel()) {
+      links.push({
+        path: "/vendor/dashboard",
+        label: "Vendor Dashboard",
+        icon: Store,
+      });
+    }
+
+    if (canAccessAdminPanel()) {
+      links.push({
+        path: "/admin/dashboard",
+        label: "Admin Panel",
+        icon: Shield,
+      });
+    }
+
+    return links;
+  };
+
+  const authenticatedLinks = getAuthenticatedLinks();
 
   return (
     <nav className="bg-white shadow-lg border-b border-natural-200 sticky top-0 z-50">
@@ -63,13 +108,14 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                     isActivePath(link.path)
                       ? "bg-primary-100 text-primary-700"
                       : "text-natural-700 hover:bg-natural-100 hover:text-primary-600"
                   }`}
                 >
-                  {link.label}
+                  {link.icon && <link.icon className="w-4 h-4" />}
+                  <span>{link.label}</span>
                 </Link>
               ))}
           </div>
@@ -78,11 +124,29 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-3">
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-natural-100 rounded-lg">
-                  <User className="w-4 h-4 text-natural-600" />
-                  <span className="text-sm font-medium text-natural-700">
-                    {user?.fullname || user?.username}
-                  </span>
+                <div className="flex items-center space-x-2">
+                  {/* User Info with Role Badge */}
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-natural-100 rounded-lg">
+                    {userRole === "admin" ? (
+                      <Shield className="w-4 h-4 text-natural-600" />
+                    ) : userRole === "vendor" ? (
+                      <Store className="w-4 h-4 text-natural-600" />
+                    ) : (
+                      <User className="w-4 h-4 text-natural-600" />
+                    )}
+                    <span className="text-sm font-medium text-natural-700">
+                      {user?.fullname || user?.username}
+                    </span>
+                    {userRole && (
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full border ${getRoleBadgeColor(
+                          userRole
+                        )}`}
+                      >
+                        {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -147,13 +211,14 @@ const Navbar = () => {
                     key={link.path}
                     to={link.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                       isActivePath(link.path)
                         ? "bg-primary-100 text-primary-700"
                         : "text-natural-700 hover:bg-natural-100"
                     }`}
                   >
-                    {link.label}
+                    {link.icon && <link.icon className="w-4 h-4" />}
+                    <span>{link.label}</span>
                   </Link>
                 ))}
 
@@ -161,10 +226,28 @@ const Navbar = () => {
                 {isAuthenticated ? (
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2 px-4 py-2 bg-natural-100 rounded-lg">
-                      <User className="w-4 h-4 text-natural-600" />
-                      <span className="text-sm font-medium text-natural-700">
-                        {user?.fullname || user?.username}
-                      </span>
+                      {userRole === "admin" ? (
+                        <Shield className="w-4 h-4 text-natural-600" />
+                      ) : userRole === "vendor" ? (
+                        <Store className="w-4 h-4 text-natural-600" />
+                      ) : (
+                        <User className="w-4 h-4 text-natural-600" />
+                      )}
+                      <div className="flex-1">
+                        <span className="text-sm font-medium text-natural-700 block">
+                          {user?.fullname || user?.username}
+                        </span>
+                        {userRole && (
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full border ${getRoleBadgeColor(
+                              userRole
+                            )} inline-block mt-1`}
+                          >
+                            {userRole.charAt(0).toUpperCase() +
+                              userRole.slice(1)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <button
                       onClick={() => {

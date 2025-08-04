@@ -27,7 +27,9 @@ const LoginPage = () => {
 
     const result = await login(loginData);
     if (result.success) {
-      navigate("/products");
+      // Navigate to role-based landing page
+      const redirectTo = result.redirectTo || "/products";
+      navigate(redirectTo);
     }
   };
 
